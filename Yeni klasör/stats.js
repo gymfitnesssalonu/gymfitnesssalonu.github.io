@@ -92,22 +92,6 @@ function istOzetRender(){
     }
 
     var html = '';
-    // Spora başlama amacı
-    var amaclar = [];
-    if(G.adminData && G.adminData.uyeler){
-        var aktifEmail = G.readonlyMode ? G.readonlyEmail : G.currentUser;
-        if(aktifEmail){
-            var eKey = aktifEmail.toLowerCase().replace(/\./g,',');
-            var uyeBilgi = G.adminData.uyeler[eKey];
-            if(uyeBilgi && uyeBilgi.amaclar && uyeBilgi.amaclar.length>0) amaclar = uyeBilgi.amaclar;
-        }
-    }
-    if(amaclar.length>0){
-        html += '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;">';
-        html += '<div style="font-size:11px;color:var(--accent);font-weight:700;margin-bottom:4px;">🎯 Spora Başlama Amacı</div>';
-        amaclar.forEach(function(a){ html += '<div style="font-size:12px;color:var(--text2);padding:1px 0;">• '+esc(a)+'</div>'; });
-        html += '</div>';
-    }
     // Vücut bilgileri satırı
     var profil = d.profil || {};
     var hedefler = d.hedefler || {};
