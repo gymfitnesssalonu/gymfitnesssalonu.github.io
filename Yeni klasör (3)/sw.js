@@ -1,4 +1,4 @@
-var CACHE_NAME = 'healthlife-v3';
+var CACHE_NAME = 'healthlife-v2';
 
 self.addEventListener('install', function(event) {
   self.skipWaiting();
@@ -14,7 +14,7 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  // Firebase API istekleri - sadece network
+  // Firebase API istekleri - sadece network (cache'leme)
   if (event.request.url.indexOf('firebasedatabase.app') !== -1 ||
       event.request.url.indexOf('googleapis.com') !== -1 ||
       event.request.url.indexOf('gstatic.com/firebasejs') !== -1 ||
@@ -34,7 +34,7 @@ self.addEventListener('fetch', function(event) {
     }).catch(function() {
       return caches.match(event.request).then(function(cached) {
         if (cached) return cached;
-        if (event.request.mode === 'navigate') return caches.match('./');
+        if (event.request.mode === 'navigate') return caches.match('./healthlife.html');
       });
     })
   );
