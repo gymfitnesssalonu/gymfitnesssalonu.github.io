@@ -59,7 +59,9 @@ function timerKiloSonrasi(rutinIdx, tarih, devamMi, isAtanan){
 
     // Kilo kaydet (kilo takip için - profil.kilo başlangıç kilosu olarak korunur)
     if(!G.userData.kiloKayitlari) G.userData.kiloKayitlari = [];
-    G.userData.kiloKayitlari.push({tarih:bugunStr(), kilo:kilo, timestamp:Date.now()});
+    var bugunKilo = G.userData.kiloKayitlari.find(function(k){ return k.tarih===bugunStr(); });
+    if(bugunKilo) bugunKilo.kilo = kilo;
+    else G.userData.kiloKayitlari.push({tarih:bugunStr(), kilo:kilo, timestamp:Date.now()});
 
     modalKapat();
 

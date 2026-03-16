@@ -85,10 +85,7 @@
                 <select id="po-cinsiyet" class="input"><option value="erkek">Erkek</option><option value="kadin">Kadın</option></select>
             </div>
         </div>
-        <div class="row2">
-            <div class="form-group"><label class="form-label">Kilo Hedefi (kg)</label><input type="number" id="po-kilo-hedef" class="input" placeholder="75" min="30" max="300" step="0.1"></div>
-            <div class="form-group"><label class="form-label">Hedef Tarih</label><input type="date" id="po-hedef-tarih" class="input"></div>
-        </div>
+        <div class="form-group"><label class="form-label">Kilo Hedefi (kg)</label><input type="number" id="po-kilo-hedef" class="input" placeholder="75" min="30" max="300" step="0.1"></div>
         <button class="btn btn-primary btn-block" onclick="profilOlustur()">🚀 Başla</button>
     </div>
 </div>
@@ -187,17 +184,9 @@
         <div class="ist-panel" id="ist-kilo-panel"><h3>⚖️ Kilo Takip</h3>
             <div class="ist-kilo-ekle-bar" id="ist-kilo-ekle-wrap">
                 <input type="number" id="ist-kilo-input" class="input" placeholder="Kilo (kg)" step="0.1" min="30" max="300" style="flex:1;padding:8px 10px;font-size:13px;">
-                <button class="btn btn-primary btn-sm" onclick="istKiloEkle()">⚖️ Ekle</button>
+                <button class="btn btn-primary btn-sm" onclick="istKiloEkle()">⚖️ Güncel Kilo Ekle</button>
             </div>
-            <div class="ist-kilo-ekle-bar" id="ist-hedef-ekle-wrap">
-                <input type="number" id="ist-hedef-kilo-input" class="input" placeholder="Hedef (kg)" step="0.1" min="30" max="300" style="flex:1;padding:8px 10px;font-size:13px;">
-                <input type="date" id="ist-hedef-tarih-input" class="input" style="flex:1;padding:8px 10px;font-size:13px;">
-                <button class="btn btn-sport btn-sm" onclick="istKiloHedefEkle()">🎯 Hedef Ekle</button>
-            </div>
-            <div id="ist-kilo-hedefler-liste"></div>
-            <div class="kilo-grafik-scroll" id="ist-kilo-chart-scroll">
-                <div class="kilo-grafik-icerik" id="ist-kilo-chart"></div>
-            </div>
+            <div id="ist-kilo-chart" style="height:120px;position:relative;"></div>
         </div>
         <div class="ist-panel"><h3>📁 Antrenman Arşivi</h3><div id="ist-arsiv"></div></div>
     </div>

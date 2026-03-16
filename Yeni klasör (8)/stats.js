@@ -116,16 +116,13 @@ function istOzetRender(){
     var guncelKilo = getGuncelKilo(d) || '-';
     var basVki = (profil.boy && profil.kilo) ? vkiHesapla(profil.boy, profil.kilo) : '-';
     var guncelVki = (profil.boy && guncelKilo!=='-') ? vkiHesapla(profil.boy, guncelKilo) : '-';
-    var kiloHedefleri = (hedefler.kiloHedefleri||[]);
-    var aktifHedef = kiloHedefleri.length>0 ? kiloHedefleri[kiloHedefleri.length-1] : null;
-    var kiloHedefStr = aktifHedef ? aktifHedef.hedefKilo : '-';
-    var hedefTarihStr = aktifHedef ? aktifHedef.hedefTarih : '';
+    var kiloHedef = hedefler.kiloHedef || '-';
     html += '<div class="ist-ozet-kart"><span class="oz-val" style="color:var(--cyan);">'+boy+'</span><span class="oz-lbl">Boy (cm)</span></div>';
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-purple">'+basKilo+'</span><span class="oz-lbl">Başlangıç (kg)</span></div>';
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-orange">'+guncelKilo+'</span><span class="oz-lbl">Güncel (kg)</span></div>';
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-purple">'+basVki+'</span><span class="oz-lbl">Başl. VKİ</span></div>';
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-orange">'+guncelVki+'</span><span class="oz-lbl">Güncel VKİ</span></div>';
-    html += '<div class="ist-ozet-kart"><span class="oz-val oz-accent">'+kiloHedefStr+'</span><span class="oz-lbl">Hedef (kg)'+(hedefTarihStr?'<br><span style="font-size:9px;color:var(--text3);">'+hedefTarihStr+'</span>':'')+'</span></div>';
+    html += '<div class="ist-ozet-kart"><span class="oz-val oz-accent">'+kiloHedef+'</span><span class="oz-lbl">Hedef (kg)</span></div>';
     // Spor istatistikleri
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-green">'+msToDkStr(topBugun)+'</span><span class="oz-lbl">Bugün Spor</span></div>';
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-accent">'+msToDkStr(topHafta)+'</span><span class="oz-lbl">Bu Hafta</span></div>';
@@ -260,9 +257,7 @@ function istTakRender(){
         if(veri) miniHtml = '<div class="tak-gun-mini">'+msToDkStr(veri.sporMs)+'</div>';
 
         var kiloK = (d.kiloKayitlari||[]).find(function(k){ return k.tarih===ds; });
-        var aktifKiloHedef=((d.hedefler||{}).kiloHedefleri||[]);
-        var sonHedef=aktifKiloHedef.length>0?aktifKiloHedef[aktifKiloHedef.length-1].hedefKilo:999;
-        if(kiloK) miniHtml += '<div class="tak-gun-kilo" style="color:'+(kiloK.kilo>sonHedef?'var(--red)':'var(--green)')+'">'+kiloK.kilo+'</div>';
+        if(kiloK) miniHtml += '<div class="tak-gun-kilo" style="color:'+(kiloK.kilo>((d.hedefler||{}).kiloHedef||999)?'var(--red)':'var(--green)')+'">'+kiloK.kilo+'</div>';
 
         // Tooltip
         var tooltipHtml = '';
@@ -379,250 +374,56 @@ function istKarsRender(){
 }
 
 // ══════════════════════════════════════════════════════════
-// KİLO TAKİP GRAFİĞİ (Çoklu Hedef)
+// KİLO TAKİP GRAFİĞİ
 // ══════════════════════════════════════════════════════════
 function istKiloRender(){
     var d = getAktifData();
-    var kayitlar = (d.kiloKayitlari||[]).slice().sort(function(a,b){ return (a.timestamp||0)-(b.timestamp||0); });
-    var hedefler = (d.hedefler&&d.hedefler.kiloHedefleri)||[];
-    var bugunS = bugunStr();
-
-    // Hedefler listesini render et
-    var listeEl = document.getElementById('ist-kilo-hedefler-liste');
-    if(listeEl){
-        var lHtml='';
-        hedefler.forEach(function(h,i){
-            var durum='';var badgeCls='';
-            var bugunD=new Date(bugunS);var hedefD=new Date(h.hedefTarih);
-            if(bugunD>=hedefD){durum='Tamamlandı';badgeCls='background:var(--green);color:#000;';}
-            else{var kalanGun=Math.ceil((hedefD-bugunD)/(1000*60*60*24));durum=kalanGun+' gün kaldı';badgeCls='background:var(--accent-g);color:var(--accent);';}
-            lHtml+='<div class="kilo-hedef-item">';
-            lHtml+='<span>🎯</span>';
-            lHtml+='<div class="kh-bilgi"><strong>Hedef '+(i+1)+':</strong> '+h.hedefKilo+' kg → '+h.hedefTarih+'</div>';
-            lHtml+='<span class="kh-badge" style="'+badgeCls+'">'+durum+'</span>';
-            if(!G.readonlyMode) lHtml+='<button class="btn btn-danger btn-sm" style="padding:2px 6px;font-size:10px;" onclick="istKiloHedefSil('+i+')">✕</button>';
-            lHtml+='</div>';
-        });
-        listeEl.innerHTML=lHtml;
-    }
-
-    // Grafik çiz
-    var chartEl = document.getElementById('ist-kilo-chart');
-    if(!chartEl) return;
-
-    if(hedefler.length===0 && kayitlar.length===0){
-        chartEl.innerHTML='<div style="color:var(--text3);font-size:11px;text-align:center;padding:30px;min-width:280px;">Henüz kilo kaydı veya hedef yok.</div>';
+    var kayitlar = (d.kiloKayitlari||[]).slice().sort(function(a,b){ return a.timestamp-b.timestamp; });
+    if(kayitlar.length<2){
+        document.getElementById('ist-kilo-chart').innerHTML = '<div style="color:var(--text3);font-size:11px;text-align:center;padding:20px;">En az 2 kilo kaydı gerekli.</div>';
         return;
     }
 
-    // Hedef yoksa tek grafik çiz (sadece kilo kayıtları)
-    if(hedefler.length===0){
-        chartEl.innerHTML=kiloGrafikSVG(kayitlar,null,280);
-        return;
-    }
-
-    // Hedef bazlı grafikler oluştur
-    var html='';
-    hedefler.forEach(function(hedef,hIdx){
-        var basT=hedef.baslangicTarih||hedef.olusturmaTarihi;
-        var bitT=hedef.hedefTarih;
-        var basK=hedef.baslangicKilo;
-        var hedefK=hedef.hedefKilo;
-
-        // Bu hedefin dönemine ait kilo kayıtlarını filtrele
-        var basD=new Date(basT).getTime();
-        var bitD=new Date(bitT).getTime();
-        var bugunD=new Date(bugunS).getTime();
-        var gosterimBitT=bugunD<=bitD?bugunD:bitD;
-
-        var donemKayitlari=kayitlar.filter(function(k){
-            var kT=k.timestamp||new Date(k.tarih).getTime();
-            return kT>=basD && kT<=gosterimBitT+(24*60*60*1000);
-        });
-
-        // Başlangıç noktasını ekle (yoksa)
-        if(donemKayitlari.length===0||donemKayitlari[0].timestamp>basD){
-            donemKayitlari.unshift({tarih:basT,kilo:basK,timestamp:basD});
-        }
-
-        var hedefObj={basT:basT,bitT:bitT,basK:basK,hedefK:hedefK,idx:hIdx};
-        html+= kiloGrafikSVG(donemKayitlari,hedefObj,280);
-    });
-
-    chartEl.innerHTML=html;
-}
-
-function kiloGrafikSVG(kayitlar,hedef,genislik){
-    var w=genislik||280, h=180, padding=35, chartW=w-padding-10, chartH=h-40;
-
-    // Min/max hesapla
+    var son20 = kayitlar.slice(-20);
     var minK=999, maxK=0;
-    kayitlar.forEach(function(k){ if(k.kilo<minK) minK=k.kilo; if(k.kilo>maxK) maxK=k.kilo; });
-    if(hedef){
-        if(hedef.basK<minK) minK=hedef.basK;
-        if(hedef.basK>maxK) maxK=hedef.basK;
-        if(hedef.hedefK<minK) minK=hedef.hedefK;
-        if(hedef.hedefK>maxK) maxK=hedef.hedefK;
-    }
-    minK=Math.floor(minK-1);maxK=Math.ceil(maxK+1);
-    var range=maxK-minK||1;
+    son20.forEach(function(k){ if(k.kilo<minK) minK=k.kilo; if(k.kilo>maxK) maxK=k.kilo; });
+    var hedef = (d.hedefler||{}).kiloHedef || 0;
+    if(hedef>0 && hedef<minK) minK = hedef-1;
+    if(hedef>0 && hedef>maxK) maxK = hedef+1;
+    var range = maxK-minK || 1;
+    var w=100, h=120, padding=30, chartW=w-padding, chartH=h-20;
 
-    // Zaman aralığı
-    var minT,maxT;
-    if(hedef){
-        minT=new Date(hedef.basT).getTime();
-        maxT=new Date(hedef.bitT).getTime();
-    } else {
-        minT=kayitlar[0].timestamp||new Date(kayitlar[0].tarih).getTime();
-        maxT=kayitlar.length>1?(kayitlar[kayitlar.length-1].timestamp||new Date(kayitlar[kayitlar.length-1].tarih).getTime()):minT+(24*60*60*1000);
-    }
-    var tRange=maxT-minT||1;
+    var svg = '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:100%;" xmlns="http://www.w3.org/2000/svg">';
 
-    function xPos(t){ return padding+((t-minT)/tRange)*chartW; }
-    function yPos(k){ return 15+chartH-((k-minK)/range)*chartH; }
-
-    var svg='<div class="kilo-grafik-kart" style="width:'+w+'px;">';
-    svg+='<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:100%;" xmlns="http://www.w3.org/2000/svg">';
-
-    // Başlık
-    if(hedef){
-        svg+='<text x="'+w/2+'" y="12" fill="var(--text2)" font-size="8" font-family="Outfit,sans-serif" font-weight="700" text-anchor="middle">Hedef '+(hedef.idx+1)+': '+hedef.basK+'kg → '+hedef.hedefK+'kg</text>';
+    // Hedef çizgisi
+    if(hedef>0){
+        var hy = chartH - ((hedef-minK)/range)*chartH + 10;
+        svg += '<line x1="'+padding+'" y1="'+hy+'" x2="'+w+'" y2="'+hy+'" stroke="var(--green)" stroke-width="0.5" stroke-dasharray="2,2"/>';
+        svg += '<text x="2" y="'+(hy+3)+'" fill="var(--green)" font-size="3" font-family="JetBrains Mono,monospace">'+hedef+'</text>';
     }
 
-    // Y ekseni kılavuz çizgileri ve etiketleri
-    var step=range<=5?1:range<=15?2:5;
-    for(var yk=Math.ceil(minK/step)*step;yk<=maxK;yk+=step){
-        var yy=yPos(yk);
-        svg+='<line x1="'+padding+'" y1="'+yy+'" x2="'+(w-10)+'" y2="'+yy+'" stroke="var(--border)" stroke-width="0.3"/>';
-        svg+='<text x="'+(padding-3)+'" y="'+(yy+2.5)+'" fill="var(--text3)" font-size="6" font-family="JetBrains Mono,monospace" text-anchor="end">'+yk+'</text>';
-    }
-
-    // Çizgi 1: Hedef çizgisi (yeşil, kesikli - başlangıç kilo → hedef kilo)
-    if(hedef){
-        var hx1=xPos(new Date(hedef.basT).getTime());
-        var hy1=yPos(hedef.basK);
-        var hx2=xPos(new Date(hedef.bitT).getTime());
-        var hy2=yPos(hedef.hedefK);
-        svg+='<line x1="'+hx1+'" y1="'+hy1+'" x2="'+hx2+'" y2="'+hy2+'" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.8"/>';
-        // Başlangıç ve bitiş noktaları
-        svg+='<circle cx="'+hx1+'" cy="'+hy1+'" r="3" fill="var(--green)" opacity="0.6"/>';
-        svg+='<circle cx="'+hx2+'" cy="'+hy2+'" r="3" fill="var(--green)" opacity="0.6"/>';
-        // Hedef kilo etiketi
-        svg+='<text x="'+(hx2+3)+'" y="'+(hy2+2)+'" fill="var(--green)" font-size="6" font-family="JetBrains Mono,monospace" font-weight="700">'+hedef.hedefK+'</text>';
-    }
-
-    // Çizgi 2: Gerçek kilo kayıtları (turuncu)
-    if(kayitlar.length>0){
-        var points=[];
-        kayitlar.forEach(function(k){
-            var t=k.timestamp||new Date(k.tarih).getTime();
-            var x=xPos(t);
-            var y=yPos(k.kilo);
-            points.push(x.toFixed(1)+','+y.toFixed(1));
-        });
-        if(points.length>1){
-            svg+='<polyline fill="none" stroke="var(--orange)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="'+points.join(' ')+'"/>';
-        }
-        // Noktalar
-        kayitlar.forEach(function(k,i){
-            var t=k.timestamp||new Date(k.tarih).getTime();
-            var x=xPos(t);var y=yPos(k.kilo);
-            var renk=hedef?(k.kilo<=hedef.hedefK?'var(--green)':'var(--orange)'):'var(--orange)';
-            svg+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="2" fill="'+renk+'"/>';
-            // İlk ve son kayıtta kilo etiketi
-            if(i===0||i===kayitlar.length-1){
-                svg+='<text x="'+x.toFixed(1)+'" y="'+(y-5)+'" fill="var(--orange)" font-size="5.5" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle">'+k.kilo+'</text>';
-            }
-        });
-    }
-
-    // X ekseni: tarih etiketleri
-    var basLabel=hedef?hedef.basT:(kayitlar[0]?kayitlar[0].tarih:'');
-    var bitLabel=hedef?hedef.bitT:(kayitlar.length>1?kayitlar[kayitlar.length-1].tarih:'');
-    if(basLabel) svg+='<text x="'+padding+'" y="'+(h-3)+'" fill="var(--text3)" font-size="5.5" font-family="JetBrains Mono,monospace">'+basLabel.substring(5)+'</text>';
-    if(bitLabel) svg+='<text x="'+(w-10)+'" y="'+(h-3)+'" fill="var(--text3)" font-size="5.5" font-family="JetBrains Mono,monospace" text-anchor="end">'+bitLabel.substring(5)+'</text>';
-
-    // Bugün çizgisi
-    var bugunT=new Date(bugunStr()).getTime();
-    if(bugunT>=minT && bugunT<=maxT){
-        var bx=xPos(bugunT);
-        svg+='<line x1="'+bx+'" y1="15" x2="'+bx+'" y2="'+(h-18)+'" stroke="var(--cyan)" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>';
-        svg+='<text x="'+bx+'" y="'+(h-12)+'" fill="var(--cyan)" font-size="5" font-family="JetBrains Mono,monospace" text-anchor="middle">Bugün</text>';
-    }
-
-    svg+='</svg></div>';
-    return svg;
-}
-
-// ══════════════════════════════════════════════════════════
-// KİLO HEDEF EKLEME / SİLME
-// ══════════════════════════════════════════════════════════
-async function istKiloHedefEkle(){
-    if(G.readonlyMode) return;
-    var hedefKilo=parseFloat(document.getElementById('ist-hedef-kilo-input').value);
-    var hedefTarih=document.getElementById('ist-hedef-tarih-input').value;
-    if(!hedefKilo||hedefKilo<30||hedefKilo>300){bildirim('⚠️ Geçerli hedef kilo girin!','uyari');return;}
-    if(!hedefTarih){bildirim('⚠️ Hedef tarih seçin!','uyari');return;}
-    if(!G.userData.hedefler) G.userData.hedefler={gunlukDk:0,haftalikDk:0,kiloHedef:0};
-    if(!G.userData.hedefler.kiloHedefleri) G.userData.hedefler.kiloHedefleri=[];
-    var hedefler=G.userData.hedefler.kiloHedefleri;
-    var basT,basK;
-    if(hedefler.length===0){
-        // İlk hedef: profildeki başlangıç kilosu ve tarihi
-        basT=G.userData.profil?G.userData.profil.createdDate||bugunStr():bugunStr();
-        basK=G.userData.profil?G.userData.profil.kilo||0:0;
-    } else {
-        // Sonraki hedef: önceki hedefin bitiş tarihi ve o tarihteki güncel kilo
-        var onceki=hedefler[hedefler.length-1];
-        basT=onceki.hedefTarih;
-        if(hedefTarih<=basT){bildirim('⚠️ Hedef tarih önceki hedeften ('+basT+') sonra olmalı!','uyari');return;}
-        // Önceki hedef bitiş tarihindeki en yakın kilo
-        basK=enYakinKilo(G.userData.kiloKayitlari||[],basT);
-        if(!basK) basK=getGuncelKilo(G.userData)||onceki.hedefKilo;
-    }
-    hedefler.push({hedefKilo:hedefKilo,hedefTarih:hedefTarih,baslangicTarih:basT,baslangicKilo:basK,olusturmaTarihi:bugunStr()});
-    G.userData.hedefler.kiloHedef=hedefKilo;
-    yuklemeGoster();
-    try{
-        await fbYazUye(emailKey(G.currentUser),G.userData);
-        bildirim('🎯 Hedef eklendi!','basari');
-        document.getElementById('ist-hedef-kilo-input').value='';
-        document.getElementById('ist-hedef-tarih-input').value='';
-        istKiloRender();
-        istOzetRender();
-    }catch(e){bildirim('⚠️ Hata!','hata');}
-    yuklemeGizle();
-}
-window.istKiloHedefEkle=istKiloHedefEkle;
-
-async function istKiloHedefSil(idx){
-    if(G.readonlyMode) return;
-    if(!confirm('Hedef '+(idx+1)+' silinecek. Emin misiniz?')) return;
-    G.userData.hedefler.kiloHedefleri.splice(idx,1);
-    // Son hedefi kiloHedef olarak güncelle
-    var h=G.userData.hedefler.kiloHedefleri;
-    G.userData.hedefler.kiloHedef=h.length>0?h[h.length-1].hedefKilo:0;
-    yuklemeGoster();
-    try{
-        await fbYazUye(emailKey(G.currentUser),G.userData);
-        bildirim('🗑️ Hedef silindi!','basari');
-        istKiloRender();
-        istOzetRender();
-    }catch(e){bildirim('⚠️ Hata!','hata');}
-    yuklemeGizle();
-}
-window.istKiloHedefSil=istKiloHedefSil;
-
-function enYakinKilo(kayitlar,tarih){
-    if(!kayitlar||kayitlar.length===0) return 0;
-    var hedefT=new Date(tarih).getTime();
-    var enYakin=null;var enFark=Infinity;
-    kayitlar.forEach(function(k){
-        var kT=k.timestamp||new Date(k.tarih).getTime();
-        var fark=Math.abs(kT-hedefT);
-        if(fark<enFark){enFark=fark;enYakin=k.kilo;}
+    // Çizgi grafik
+    var points = [];
+    son20.forEach(function(k,i){
+        var x = padding + ((i/(son20.length-1))*chartW);
+        var y = chartH - ((k.kilo-minK)/range)*chartH + 10;
+        points.push(x+','+y);
     });
-    return enYakin||0;
+    svg += '<polyline fill="none" stroke="var(--orange)" stroke-width="1.5" points="'+points.join(' ')+'"/>';
+
+    // Noktalar ve tarih etiketleri
+    son20.forEach(function(k,i){
+        var x = padding + ((i/(son20.length-1))*chartW);
+        var y = chartH - ((k.kilo-minK)/range)*chartH + 10;
+        var renk = hedef>0 ? (k.kilo<=hedef?'var(--green)':'var(--red)') : 'var(--orange)';
+        svg += '<circle cx="'+x+'" cy="'+y+'" r="2" fill="'+renk+'"/>';
+        if(i===0 || i===son20.length-1){
+            svg += '<text x="'+x+'" y="'+(h-2)+'" fill="var(--text3)" font-size="3" font-family="JetBrains Mono,monospace" text-anchor="middle">'+k.tarih.substring(5)+'</text>';
+        }
+    });
+
+    svg += '</svg>';
+    document.getElementById('ist-kilo-chart').innerHTML = svg;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -633,7 +434,10 @@ async function istKiloEkle(){
     var kilo = parseFloat(document.getElementById('ist-kilo-input').value);
     if(!kilo||kilo<30||kilo>300){ bildirim('⚠️ Geçerli kilo girin! (30-300 kg)','uyari'); return; }
     if(!G.userData.kiloKayitlari) G.userData.kiloKayitlari = [];
-    G.userData.kiloKayitlari.push({tarih:bugunStr(), kilo:kilo, timestamp:Date.now()});
+    var bugunS = bugunStr();
+    var bugunKilo = G.userData.kiloKayitlari.find(function(k){ return k.tarih===bugunS; });
+    if(bugunKilo){ bugunKilo.kilo = kilo; bugunKilo.timestamp = Date.now(); }
+    else G.userData.kiloKayitlari.push({tarih:bugunS, kilo:kilo, timestamp:Date.now()});
     yuklemeGoster();
     try{
         await fbYazUye(emailKey(G.currentUser), G.userData);

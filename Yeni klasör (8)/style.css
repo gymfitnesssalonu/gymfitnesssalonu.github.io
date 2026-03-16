@@ -169,18 +169,9 @@ select.input{appearance:none;-webkit-appearance:none;background-image:url("data:
 .ist-hedef-bar input[type=number]{width:56px;background:var(--bg2);border:1px solid var(--border);color:var(--accent);padding:6px 8px;border-radius:8px;font-size:13px;font-family:'JetBrains Mono',monospace;text-align:center;outline:none;}
 .ist-hedef-bar input[type=number]:focus{border-color:var(--accent);}
 .ist-hedef-bar span{color:var(--text3);font-size:12px;}
-.ist-kilo-ekle-bar{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.ist-kilo-ekle-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
 .ist-kilo-ekle-bar .input{background:var(--bg2);border:1px solid var(--border);color:var(--orange);font-family:'JetBrains Mono',monospace;font-weight:700;border-radius:8px;outline:none;}
 .ist-kilo-ekle-bar .input:focus{border-color:var(--orange);}
-.kilo-grafik-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;margin-top:8px;padding-bottom:4px;}
-.kilo-grafik-scroll::-webkit-scrollbar{height:4px;}
-.kilo-grafik-scroll::-webkit-scrollbar-track{background:var(--bg2);border-radius:2px;}
-.kilo-grafik-scroll::-webkit-scrollbar-thumb{background:var(--accent-d);border-radius:2px;}
-.kilo-grafik-icerik{display:flex;gap:0;min-width:min-content;}
-.kilo-grafik-kart{flex-shrink:0;width:280px;height:180px;position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.kilo-hedef-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:12px;}
-.kilo-hedef-item .kh-bilgi{flex:1;color:var(--text2);}
-.kilo-hedef-item .kh-badge{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:700;}
 .ist-progress{height:6px;background:var(--border);border-radius:3px;margin-top:8px;width:100%;overflow:hidden;}
 .ist-progress-fill{height:100%;border-radius:3px;transition:width .5s ease;background:linear-gradient(90deg,var(--green),var(--accent));}
 .ist-ozet{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:16px;}

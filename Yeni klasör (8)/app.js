@@ -84,7 +84,6 @@ export async function loadUserData(eKey){
     if(!data.kiloKayitlari) data.kiloKayitlari = [];
     if(!data.diyetKayitlari) data.diyetKayitlari = [];
     if(!data.hedefler) data.hedefler = {gunlukDk:0,haftalikDk:0,kiloHedef:0};
-    if(!data.hedefler.kiloHedefleri) data.hedefler.kiloHedefleri = [];
     if(!data.atananRutinler) data.atananRutinler = [];
     if(!data.atananDiyetler) data.atananDiyetler = [];
     return data;
@@ -382,12 +381,6 @@ async function profilOlustur(){
     yuklemeGoster();
     G.userData.profil={avatar:avatar?avatar.dataset.avatar:'💪',nick:nick,boy:boy,kilo:kilo,dogumTarihi:document.getElementById('po-dogum').value,cinsiyet:document.getElementById('po-cinsiyet').value,createdDate:bugunStr()};
     G.userData.hedefler.kiloHedef=parseFloat(document.getElementById('po-kilo-hedef').value)||kilo;
-    var hedefTarih=document.getElementById('po-hedef-tarih').value||'';
-    var hedefKilo=parseFloat(document.getElementById('po-kilo-hedef').value)||0;
-    if(hedefKilo>0&&hedefTarih){
-        if(!G.userData.hedefler.kiloHedefleri) G.userData.hedefler.kiloHedefleri=[];
-        G.userData.hedefler.kiloHedefleri.push({hedefKilo:hedefKilo,hedefTarih:hedefTarih,baslangicTarih:bugunStr(),baslangicKilo:kilo,olusturmaTarihi:bugunStr()});
-    }
     G.userData.kiloKayitlari.push({tarih:bugunStr(),kilo:kilo,timestamp:Date.now()});
     try{await fbYazUye(emailKey(G.currentUser),G.userData);bildirim('🚀 Profil oluşturuldu!','basari');girisBasarili();}
     catch(e){bildirim('⚠️ Kayıt hatası!','hata');}
@@ -433,7 +426,6 @@ async function readonlyBaslat(email, tabHedef){
     document.getElementById('ekle-alan').classList.add('gizli');
     document.getElementById('ist-hedef-bar-wrap').classList.add('gizli');
     document.getElementById('ist-kilo-ekle-wrap').classList.add('gizli');
-    document.getElementById('ist-hedef-ekle-wrap').classList.add('gizli');
     modalKapat();
     if(tabHedef==='istatistik'){
         document.querySelectorAll('#alt-menu button').forEach(function(b){b.classList.remove('aktif');});
@@ -453,7 +445,6 @@ function readonlyKapat(){
     document.getElementById('ekle-alan').classList.remove('gizli');
     document.getElementById('ist-hedef-bar-wrap').classList.remove('gizli');
     document.getElementById('ist-kilo-ekle-wrap').classList.remove('gizli');
-    document.getElementById('ist-hedef-ekle-wrap').classList.remove('gizli');
     document.querySelectorAll('#alt-menu button').forEach(function(b){b.classList.remove('aktif');});
     document.getElementById('mn-profil').classList.add('aktif');
     ekranGoster('ekran-profil');
@@ -1594,8 +1585,7 @@ export function takTakvimRender(){
         if(sporMs>0&&hedefDk>0)cls+=sporMs>=(hedefDk*60000)?' hedef-ok':' hedef-fail';
         var miniHtml='';
         if(sporMs>0)miniHtml='<div class="tak-gun-mini">'+msToDkStr(sporMs)+'</div>';
-        var aktifKH=((d.hedefler||{}).kiloHedefleri||[]);var sonKH=aktifKH.length>0?aktifKH[aktifKH.length-1].hedefKilo:999;
-        if(kiloK)miniHtml+='<div class="tak-gun-kilo" style="color:'+(kiloK.kilo>sonKH?'var(--red)':'var(--green)')+'">'+kiloK.kilo+'kg</div>';
+        if(kiloK)miniHtml+='<div class="tak-gun-kilo" style="color:'+(kiloK.kilo>((d.hedefler||{}).kiloHedef||999)?'var(--red)':'var(--green)')+'">'+kiloK.kilo+'kg</div>';
         html+='<div class="'+cls+'" onclick="takGunTikla(\''+ds+'\')"><div class="tak-gun-num">'+g+'</div>'+miniHtml+'</div>';
     }
     document.getElementById('tak-grid').innerHTML=html;
@@ -1658,9 +1648,7 @@ function profilRender(){
     var d=getAktifData();if(!d||!d.profil)return;
     document.getElementById('pr-avatar').textContent=d.profil.avatar||'🏋️';
     document.getElementById('pr-ad').textContent=d.profil.nick||G.currentUser;
-    var kiloHedefleri=(d.hedefler||{}).kiloHedefleri||[];
-    var aktifHedef=kiloHedefleri.length>0?kiloHedefleri[kiloHedefleri.length-1]:null;
-    document.getElementById('pr-hedef').textContent=aktifHedef?'Kilo Hedefi: '+aktifHedef.hedefKilo+' kg ('+aktifHedef.hedefTarih+')':'Kilo hedefi belirlenmemiş';
+    document.getElementById('pr-hedef').textContent='Kilo Hedefi: '+((d.hedefler||{}).kiloHedef||'-')+' kg';
     document.getElementById('pr-boy').textContent=d.profil.boy||'-';
     document.getElementById('pr-kilo').textContent=d.profil.kilo||'-';
     var guncelKilo=getGuncelKilo(d);
@@ -1677,7 +1665,7 @@ function profilDuzenleModal(){
     html+='<div class="row2"><div class="form-group"><label class="form-label">Boy (cm)</label><input type="number" id="pd-boy" class="input" value="'+(p.boy||'')+'"></div>';
     html+='<div class="form-group"><label class="form-label">Başlangıç Kilosu (kg)</label><input type="number" id="pd-kilo" class="input" value="'+(p.kilo||'')+'" step="0.1"></div></div>';
     html+='<p style="font-size:11px;color:var(--text3);margin:-6px 0 8px;">💡 Güncel kilo için İstatistikler → Kilo Takip bölümünü kullanın.</p>';
-    html+='<p style="font-size:11px;color:var(--text3);margin-bottom:8px;">🎯 Kilo hedefleri İstatistikler → Kilo Takip bölümünden yönetilir.</p>';
+    html+='<div class="form-group"><label class="form-label">Kilo Hedefi (kg)</label><input type="number" id="pd-kilo-hedef" class="input" value="'+((G.userData.hedefler||{}).kiloHedef||'')+'" step="0.1"></div>';
     html+='<button class="btn btn-primary btn-block" onclick="profilKaydet()">💾 Kaydet</button>';
     modalAc(html);
 }
@@ -1688,6 +1676,7 @@ async function profilKaydet(){
     G.userData.profil.nick=nick;
     G.userData.profil.boy=parseFloat(document.getElementById('pd-boy').value)||G.userData.profil.boy;
     G.userData.profil.kilo=parseFloat(document.getElementById('pd-kilo').value)||G.userData.profil.kilo;
+    G.userData.hedefler.kiloHedef=parseFloat(document.getElementById('pd-kilo-hedef').value)||G.userData.hedefler.kiloHedef;
     yuklemeGoster();
     try{await fbYazUye(emailKey(G.currentUser),G.userData);bildirim('✅ Güncellendi!','basari');profilRender();modalKapat();}
     catch(e){bildirim('⚠️ Hata!','hata');}yuklemeGizle();
