@@ -504,64 +504,11 @@ function adminUyeDetay(eKey){
     html+='<button class="btn btn-ghost btn-sm" onclick="readonlyBaslat(\''+esc(email)+'\',\'istatistik\')">📊 İstatistik</button>';
     html+='<button class="btn btn-sport btn-sm" onclick="adminUyeRutinAtaModal(\''+esc(eKey)+'\')">💪 Spor</button>';
     html+='<button class="btn btn-diet btn-sm" onclick="adminUyeDiyetAtaModal(\''+esc(eKey)+'\')">🥗 Diyet</button>';
-    html+='<button class="btn btn-ghost btn-sm" onclick="adminUyeDuzenleModal(\''+esc(eKey)+'\')">✏️ Düzenle</button>';
     html+='<button class="btn btn-danger btn-sm" onclick="adminUyeSil(\''+esc(eKey)+'\')">🗑️ Sil</button>';
     html+='</div>';
     modalAc(html);
 }
 window.adminUyeDetay = adminUyeDetay;
-
-function adminUyeDuzenleModal(eKey){
-    var u=(G.adminData.uyeler||{})[eKey];if(!u)return;
-    var email=keyToEmail(eKey);
-    var html='<h3 style="color:var(--accent);margin-bottom:14px;">✏️ Üye Düzenle</h3>';
-    html+='<div class="row2"><div class="form-group"><label class="form-label">Ad</label><input type="text" id="ud-ad" class="input" value="'+esc(u.ad||'')+'"></div>';
-    html+='<div class="form-group"><label class="form-label">Soyad</label><input type="text" id="ud-soyad" class="input" value="'+esc(u.soyad||'')+'"></div></div>';
-    html+='<div class="form-group"><label class="form-label">E-posta (değiştirilemez)</label><input type="email" class="input" value="'+esc(email)+'" disabled style="opacity:0.5;"></div>';
-    html+='<div class="form-group"><label class="form-label">Telefon</label><input type="tel" id="ud-tel" class="input" value="'+esc(u.tel||'')+'"></div>';
-    html+='<div class="form-group"><label class="form-label">Adres</label><input type="text" id="ud-adres" class="input" value="'+esc(u.adres||'')+'"></div>';
-    // Amaçlar
-    html+='<div class="form-group"><label class="form-label">🎯 Spora Başlama Amacı</label>';
-    html+='<div id="ud-amaclar-liste">';
-    (u.amaclar||[]).forEach(function(a){
-        html+='<div style="display:flex;gap:4px;margin-bottom:4px;align-items:center;"><input type="text" class="input ud-amac-input" value="'+esc(a)+'" style="padding:8px 10px;font-size:13px;"><button class="btn btn-danger btn-sm" style="padding:4px 8px;" onclick="this.parentElement.remove()">✕</button></div>';
-    });
-    html+='</div>';
-    html+='<div style="display:flex;gap:4px;"><input type="text" id="ud-amac-yeni" class="input" placeholder="Yeni amaç ekle..." style="padding:8px 10px;font-size:13px;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();udAmacEkle();}"><button class="btn btn-ghost btn-sm" onclick="udAmacEkle()">+ Ekle</button></div>';
-    html+='</div>';
-    html+='<button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="adminUyeDuzenleKaydet(\''+esc(eKey)+'\')">💾 Kaydet</button>';
-    modalAc(html);
-}
-window.adminUyeDuzenleModal = adminUyeDuzenleModal;
-
-function udAmacEkle(){
-    var input=document.getElementById('ud-amac-yeni');var val=input.value.trim();if(!val)return;
-    document.getElementById('ud-amaclar-liste').insertAdjacentHTML('beforeend','<div style="display:flex;gap:4px;margin-bottom:4px;align-items:center;"><input type="text" class="input ud-amac-input" value="'+esc(val)+'" style="padding:8px 10px;font-size:13px;"><button class="btn btn-danger btn-sm" style="padding:4px 8px;" onclick="this.parentElement.remove()">✕</button></div>');
-    input.value='';input.focus();
-}
-window.udAmacEkle = udAmacEkle;
-
-async function adminUyeDuzenleKaydet(eKey){
-    var u=G.adminData.uyeler[eKey];if(!u)return;
-    var ad=document.getElementById('ud-ad').value.trim();
-    var soyad=document.getElementById('ud-soyad').value.trim();
-    if(!ad||!soyad){bildirim('⚠️ Ad ve soyad gerekli!','uyari');return;}
-    u.ad=ad;
-    u.soyad=soyad;
-    u.tel=document.getElementById('ud-tel').value.trim();
-    u.adres=document.getElementById('ud-adres').value.trim();
-    var amaclar=[];
-    document.querySelectorAll('.ud-amac-input').forEach(function(inp){var v=inp.value.trim();if(v)amaclar.push(v);});
-    u.amaclar=amaclar;
-    yuklemeGoster();
-    try{
-        await fbYaz('admin',G.adminData);
-        bildirim('✅ Üye güncellendi!','basari');
-        adminUyeDetay(eKey);
-    }catch(e){bildirim('⚠️ Hata!','hata');}
-    yuklemeGizle();
-}
-window.adminUyeDuzenleKaydet = adminUyeDuzenleKaydet;
 
 function adminUyeSifreDegModal(eKey){
     var u=(G.adminData.uyeler||{})[eKey];if(!u)return;
