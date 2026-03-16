@@ -17,8 +17,7 @@ const firebaseConfig = {
     appId: "1:217081542142:web:c998d8acbc877abbbb7caf"
 };
 
-const ADMIN_EMAILS = ['gymfitnesssalonu@gmail.com', 'recepyeni@gmail.com'];
-function isAdmin(email){ return ADMIN_EMAILS.indexOf((email||'').toLowerCase()) !== -1; }
+const ADMIN_EMAIL = 'gymfitnesssalonu@gmail.com';
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
@@ -317,7 +316,7 @@ async function uyeGirisYap(){
     var email=document.getElementById('g-email').value.trim().toLowerCase();
     var sifre=document.getElementById('g-sifre').value;
     if(!email||!sifre){bildirim('⚠️ E-posta ve şifre gerekli!','uyari');return;}
-    if(isAdmin(email)){bildirim('❌ Yönetici girişi için Yönetici sekmesini kullanın.','hata');return;}
+    if(email===ADMIN_EMAIL){bildirim('❌ Yönetici girişi için Yönetici sekmesini kullanın.','hata');return;}
     yuklemeGoster();
     try{
         await signInWithEmailAndPassword(auth, email, sifre);
@@ -346,11 +345,11 @@ async function adminGoogleGiris(){
     yuklemeGoster();
     try{
         var result = await signInWithPopup(auth, googleProvider);
-        if(!isAdmin(result.user.email)){
+        if(result.user.email!==ADMIN_EMAIL){
             await signOut(auth);
             bildirim('❌ Bu Google hesabı yönetici değil!','hata');yuklemeGizle();return;
         }
-        G.currentUser=result.user.email; G.isAdmin=true;
+        G.currentUser=ADMIN_EMAIL; G.isAdmin=true;
         G.adminData = await loadAdminData();
         if(!G.adminData.profil) G.adminData.profil={avatar:'🔐',nick:'Yönetici'};
         G.userData = G.adminData;
@@ -1619,7 +1618,7 @@ function profilRender(){
     if(G.isAdmin&&!G.readonlyMode){
         document.getElementById('pr-avatar').textContent='🔐';
         document.getElementById('pr-ad').textContent='Yönetici Paneli';
-        document.getElementById('pr-hedef').textContent=G.currentUser;
+        document.getElementById('pr-hedef').textContent=ADMIN_EMAIL;
         return;
     }
     var d=getAktifData();if(!d||!d.profil)return;
@@ -1764,9 +1763,9 @@ async function basla(){
 
         if(user){
             // Kullanıcı oturum açmış
-            if(isAdmin(user.email)){
+            if(user.email === ADMIN_EMAIL){
                 // Admin
-                G.currentUser = user.email; G.isAdmin = true;
+                G.currentUser = ADMIN_EMAIL; G.isAdmin = true;
                 G.adminData = await loadAdminData();
                 if(!G.adminData.profil) G.adminData.profil = {avatar:'🔐', nick:'Yönetici'};
                 G.userData = G.adminData;
