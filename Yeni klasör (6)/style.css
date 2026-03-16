@@ -279,11 +279,7 @@ select.input{appearance:none;-webkit-appearance:none;background-image:url("data:
 .adim-param-group input{width:52px;text-align:center;font-family:'JetBrains Mono',monospace;border:none!important;background:transparent!important;padding:3px!important;font-size:12px;}
 .adim-param-group span{font-size:10px;color:var(--text3);}
 .adim-kalori-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(249,115,22,0.15);color:var(--orange);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;}
-.adim-ust-bar{display:flex;align-items:center;gap:4px;position:absolute;top:6px;right:6px;z-index:2;}
-.adim-sira-btn{background:var(--bg);border:1px solid var(--border);color:var(--accent);cursor:pointer;font-size:11px;padding:2px 6px;border-radius:4px;opacity:.7;transition:all .2s;line-height:1;}
-.adim-sira-btn:hover{opacity:1;background:var(--accent-g);border-color:var(--accent-d);}
-.adim-sira-btn:active{transform:scale(0.9);}
-.adim-sil{background:transparent;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px;opacity:.6;transition:opacity .2s;}
+.adim-sil{position:absolute;top:6px;right:6px;background:transparent;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px;opacity:.6;transition:opacity .2s;}
 .adim-sil:hover{opacity:1;}
 .adim-diger-ad{flex:1;min-width:0;}
 .adim-not-input{width:100%;font-size:12px;padding:6px 8px;color:var(--yellow);background:var(--card);border:1px solid var(--border);border-radius:6px;font-family:'Outfit','DM Sans',sans-serif;outline:none;}

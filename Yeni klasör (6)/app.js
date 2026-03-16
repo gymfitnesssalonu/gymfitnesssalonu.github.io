@@ -1250,7 +1250,7 @@ export function sporAdimHtml(idx,a){
     var kiloKg=(d&&d.profil)?d.profil.kilo||70:70;
     var tahminiKcal=hesaplaKaloriAdim(a,kiloKg);
     var h='<div class="adim-item" data-idx="'+idx+'">';
-    h+='<div class="adim-ust-bar"><button class="adim-sira-btn" onclick="srAdimYukari(this)" title="Yukarı Taşı">▲</button><button class="adim-sira-btn" onclick="srAdimAsagi(this)" title="Aşağı Taşı">▼</button><button class="adim-sil" onclick="this.parentElement.parentElement.remove()">✕</button></div>';
+    h+='<button class="adim-sil" onclick="this.parentElement.remove()">✕</button>';
     h+='<div class="adim-row1"><select class="adim-kategori-sel" onchange="srKategoriDeg(this,'+idx+')">';
     SPOR_KATEGORILERI.forEach(function(kat){h+='<option value="'+kat.id+'"'+(kat.id===selKatId?' selected':'')+'>'+kat.ad+'</option>';});
     h+='</select><select class="adim-egz-sel" onchange="srEgzDeg(this,'+idx+')">';
@@ -1289,22 +1289,6 @@ function srAdimEkle(){
     c.insertAdjacentHTML('beforeend',sporAdimHtml(c.children.length,{egzersizId:'yuruyus',kategoriId:'kardiyo',ad:'Yürüyüş',sure:5,mola:1,met:4.3,tipiZaman:true,paramValues:{sure:5},digerAd:''}));
 }
 window.srAdimEkle = srAdimEkle;
-
-function srAdimYukari(btn){
-    var item=btn.closest('.adim-item');if(!item)return;
-    var container=item.parentElement;
-    var prev=item.previousElementSibling;
-    if(prev) container.insertBefore(item,prev);
-}
-window.srAdimYukari = srAdimYukari;
-
-function srAdimAsagi(btn){
-    var item=btn.closest('.adim-item');if(!item)return;
-    var container=item.parentElement;
-    var next=item.nextElementSibling;
-    if(next) container.insertBefore(next,item);
-}
-window.srAdimAsagi = srAdimAsagi;
 
 function srKategoriDeg(sel,idx){
     var kat=SPOR_KATEGORILERI.find(function(k){return k.id===sel.value;});if(!kat)return;
