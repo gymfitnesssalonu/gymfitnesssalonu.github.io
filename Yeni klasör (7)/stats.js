@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════════
 // İSTATİSTİKLER - stats.js
 // ══════════════════════════════════════════════════════════
-import { G, getAktifData, fbYaz, fbYazUye, emailKey, bugunStr, esc, bildirim, msToDkStr, msToStr, GUN_ADI, AY_ADI, DONUT_RENKLER, vkiHesapla, getGuncelKilo, yuklemeGoster, yuklemeGizle } from './app.js';
+import { G, getAktifData, fbYaz, fbYazUye, emailKey, bugunStr, esc, bildirim, msToDkStr, msToStr, GUN_ADI, AY_ADI, DONUT_RENKLER, vkiHesapla } from './app.js';
 
 // İstatistik takvim değişkenleri
 var istTakYil = new Date().getFullYear();
@@ -112,16 +112,12 @@ function istOzetRender(){
     var profil = d.profil || {};
     var hedefler = d.hedefler || {};
     var boy = profil.boy || '-';
-    var basKilo = profil.kilo || '-';
-    var guncelKilo = getGuncelKilo(d) || '-';
-    var basVki = (profil.boy && profil.kilo) ? vkiHesapla(profil.boy, profil.kilo) : '-';
-    var guncelVki = (profil.boy && guncelKilo!=='-') ? vkiHesapla(profil.boy, guncelKilo) : '-';
+    var kilo = profil.kilo || '-';
+    var vki = (profil.boy && profil.kilo) ? vkiHesapla(profil.boy, profil.kilo) : '-';
     var kiloHedef = hedefler.kiloHedef || '-';
     html += '<div class="ist-ozet-kart"><span class="oz-val" style="color:var(--cyan);">'+boy+'</span><span class="oz-lbl">Boy (cm)</span></div>';
-    html += '<div class="ist-ozet-kart"><span class="oz-val oz-purple">'+basKilo+'</span><span class="oz-lbl">Başlangıç (kg)</span></div>';
-    html += '<div class="ist-ozet-kart"><span class="oz-val oz-orange">'+guncelKilo+'</span><span class="oz-lbl">Güncel (kg)</span></div>';
-    html += '<div class="ist-ozet-kart"><span class="oz-val oz-purple">'+basVki+'</span><span class="oz-lbl">Başl. VKİ</span></div>';
-    html += '<div class="ist-ozet-kart"><span class="oz-val oz-orange">'+guncelVki+'</span><span class="oz-lbl">Güncel VKİ</span></div>';
+    html += '<div class="ist-ozet-kart"><span class="oz-val oz-orange">'+kilo+'</span><span class="oz-lbl">Kilo (kg)</span></div>';
+    html += '<div class="ist-ozet-kart"><span class="oz-val oz-purple">'+vki+'</span><span class="oz-lbl">VKİ</span></div>';
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-accent">'+kiloHedef+'</span><span class="oz-lbl">Hedef (kg)</span></div>';
     // Spor istatistikleri
     html += '<div class="ist-ozet-kart"><span class="oz-val oz-green">'+msToDkStr(topBugun)+'</span><span class="oz-lbl">Bugün Spor</span></div>';
@@ -425,30 +421,6 @@ function istKiloRender(){
     svg += '</svg>';
     document.getElementById('ist-kilo-chart').innerHTML = svg;
 }
-
-// ══════════════════════════════════════════════════════════
-// GÜNCEL KİLO EKLEME
-// ══════════════════════════════════════════════════════════
-async function istKiloEkle(){
-    if(G.readonlyMode) return;
-    var kilo = parseFloat(document.getElementById('ist-kilo-input').value);
-    if(!kilo||kilo<30||kilo>300){ bildirim('⚠️ Geçerli kilo girin! (30-300 kg)','uyari'); return; }
-    if(!G.userData.kiloKayitlari) G.userData.kiloKayitlari = [];
-    var bugunS = bugunStr();
-    var bugunKilo = G.userData.kiloKayitlari.find(function(k){ return k.tarih===bugunS; });
-    if(bugunKilo){ bugunKilo.kilo = kilo; bugunKilo.timestamp = Date.now(); }
-    else G.userData.kiloKayitlari.push({tarih:bugunS, kilo:kilo, timestamp:Date.now()});
-    yuklemeGoster();
-    try{
-        await fbYazUye(emailKey(G.currentUser), G.userData);
-        bildirim('✅ Güncel kilo kaydedildi: '+kilo+' kg','basari');
-        document.getElementById('ist-kilo-input').value = '';
-        istOzetRender();
-        istKiloRender();
-    }catch(e){ bildirim('⚠️ Hata!','hata'); }
-    yuklemeGizle();
-}
-window.istKiloEkle = istKiloEkle;
 
 // ══════════════════════════════════════════════════════════
 // ANTRENMAN ARŞİVİ

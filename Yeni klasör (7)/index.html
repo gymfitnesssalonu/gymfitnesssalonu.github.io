@@ -181,13 +181,7 @@
             <div class="ist-panel" style="margin-bottom:0;"><h3>⏱ Ort. Oturum</h3><div id="ist-ort" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:1.2em;color:var(--accent);font-weight:700;">--:--</div></div>
             <div class="ist-panel" style="margin-bottom:0;"><h3>🏆 En Çok Spor</h3><div id="ist-encok"></div></div>
         </div>
-        <div class="ist-panel" id="ist-kilo-panel"><h3>⚖️ Kilo Takip</h3>
-            <div class="ist-kilo-ekle-bar" id="ist-kilo-ekle-wrap">
-                <input type="number" id="ist-kilo-input" class="input" placeholder="Kilo (kg)" step="0.1" min="30" max="300" style="flex:1;padding:8px 10px;font-size:13px;">
-                <button class="btn btn-primary btn-sm" onclick="istKiloEkle()">⚖️ Güncel Kilo Ekle</button>
-            </div>
-            <div id="ist-kilo-chart" style="height:120px;position:relative;"></div>
-        </div>
+        <div class="ist-panel" id="ist-kilo-panel"><h3>⚖️ Kilo Takip</h3><div id="ist-kilo-chart" style="height:120px;position:relative;"></div></div>
         <div class="ist-panel"><h3>📁 Antrenman Arşivi</h3><div id="ist-arsiv"></div></div>
     </div>
 </div>
@@ -200,10 +194,8 @@
         <div class="profil-hedef" id="pr-hedef"></div>
         <div class="profil-vki" id="pr-vki-area">
             <div class="profil-vki-item"><div class="profil-vki-val" id="pr-boy">-</div><div class="profil-vki-lbl">Boy (cm)</div></div>
-            <div class="profil-vki-item"><div class="profil-vki-val" id="pr-kilo">-</div><div class="profil-vki-lbl">Başlangıç (kg)</div></div>
-            <div class="profil-vki-item"><div class="profil-vki-val" id="pr-guncel-kilo" style="color:var(--orange);">-</div><div class="profil-vki-lbl">Güncel (kg)</div></div>
-            <div class="profil-vki-item"><div class="profil-vki-val" id="pr-vki">-</div><div class="profil-vki-lbl">Başl. VKİ</div></div>
-            <div class="profil-vki-item"><div class="profil-vki-val" id="pr-guncel-vki" style="color:var(--orange);">-</div><div class="profil-vki-lbl">Güncel VKİ</div></div>
+            <div class="profil-vki-item"><div class="profil-vki-val" id="pr-kilo">-</div><div class="profil-vki-lbl">Kilo (kg)</div></div>
+            <div class="profil-vki-item"><div class="profil-vki-val" id="pr-vki">-</div><div class="profil-vki-lbl">VKİ</div></div>
         </div>
     </div>
     <div class="profil-menu">

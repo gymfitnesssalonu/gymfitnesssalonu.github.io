@@ -263,11 +263,6 @@ export function msToStr(ms){var t=Math.floor(ms/1000);var sa=Math.floor(t/3600);
 export function msToDkStr(ms){var dk=Math.floor(ms/60000);if(dk<60)return dk+'dk';var sa=Math.floor(dk/60);var kal=dk%60;return sa+'sa'+(kal>0?' '+kal+'dk':'');}
 export function bugunStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
 export function vkiHesapla(boy,kilo){if(!boy||!kilo)return 0;var m=boy/100;return parseFloat((kilo/(m*m)).toFixed(1));}
-export function getGuncelKilo(d){
-    if(!d||!d.kiloKayitlari||d.kiloKayitlari.length===0) return (d&&d.profil)?d.profil.kilo||0:0;
-    var sorted=d.kiloKayitlari.slice().sort(function(a,b){return (b.timestamp||0)-(a.timestamp||0);});
-    return sorted[0].kilo||0;
-}
 
 export function egzersizBul(egzId){for(var k=0;k<SPOR_KATEGORILERI.length;k++){for(var e=0;e<SPOR_KATEGORILERI[k].egzersizler.length;e++){if(SPOR_KATEGORILERI[k].egzersizler[e].id===egzId)return SPOR_KATEGORILERI[k].egzersizler[e];}}return null;}
 export function egzersizMET(egzId,met){var egz=egzersizBul(egzId);return met||((egz?egz.met:5.0));}
@@ -425,7 +420,6 @@ async function readonlyBaslat(email, tabHedef){
     document.getElementById('readonly-banner').classList.remove('gizli');
     document.getElementById('ekle-alan').classList.add('gizli');
     document.getElementById('ist-hedef-bar-wrap').classList.add('gizli');
-    document.getElementById('ist-kilo-ekle-wrap').classList.add('gizli');
     modalKapat();
     if(tabHedef==='istatistik'){
         document.querySelectorAll('#alt-menu button').forEach(function(b){b.classList.remove('aktif');});
@@ -444,7 +438,6 @@ function readonlyKapat(){
     document.getElementById('readonly-banner').classList.add('gizli');
     document.getElementById('ekle-alan').classList.remove('gizli');
     document.getElementById('ist-hedef-bar-wrap').classList.remove('gizli');
-    document.getElementById('ist-kilo-ekle-wrap').classList.remove('gizli');
     document.querySelectorAll('#alt-menu button').forEach(function(b){b.classList.remove('aktif');});
     document.getElementById('mn-profil').classList.add('aktif');
     ekranGoster('ekran-profil');
@@ -1651,10 +1644,7 @@ function profilRender(){
     document.getElementById('pr-hedef').textContent='Kilo Hedefi: '+((d.hedefler||{}).kiloHedef||'-')+' kg';
     document.getElementById('pr-boy').textContent=d.profil.boy||'-';
     document.getElementById('pr-kilo').textContent=d.profil.kilo||'-';
-    var guncelKilo=getGuncelKilo(d);
-    document.getElementById('pr-guncel-kilo').textContent=guncelKilo||'-';
     document.getElementById('pr-vki').textContent=vkiHesapla(d.profil.boy,d.profil.kilo)||'-';
-    document.getElementById('pr-guncel-vki').textContent=guncelKilo?vkiHesapla(d.profil.boy,guncelKilo)||'-':'-';
 }
 
 function profilDuzenleModal(){
@@ -1663,8 +1653,7 @@ function profilDuzenleModal(){
     var html='<h3 style="color:var(--accent);margin-bottom:14px;">✏️ Profili Düzenle</h3>';
     html+='<div class="form-group"><label class="form-label">İsim</label><input type="text" id="pd-nick" class="input" value="'+esc(p.nick||'')+'" maxlength="20"></div>';
     html+='<div class="row2"><div class="form-group"><label class="form-label">Boy (cm)</label><input type="number" id="pd-boy" class="input" value="'+(p.boy||'')+'"></div>';
-    html+='<div class="form-group"><label class="form-label">Başlangıç Kilosu (kg)</label><input type="number" id="pd-kilo" class="input" value="'+(p.kilo||'')+'" step="0.1"></div></div>';
-    html+='<p style="font-size:11px;color:var(--text3);margin:-6px 0 8px;">💡 Güncel kilo için İstatistikler → Kilo Takip bölümünü kullanın.</p>';
+    html+='<div class="form-group"><label class="form-label">Kilo (kg)</label><input type="number" id="pd-kilo" class="input" value="'+(p.kilo||'')+'" step="0.1"></div></div>';
     html+='<div class="form-group"><label class="form-label">Kilo Hedefi (kg)</label><input type="number" id="pd-kilo-hedef" class="input" value="'+((G.userData.hedefler||{}).kiloHedef||'')+'" step="0.1"></div>';
     html+='<button class="btn btn-primary btn-block" onclick="profilKaydet()">💾 Kaydet</button>';
     modalAc(html);

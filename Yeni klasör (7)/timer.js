@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════════
 // SPOR TIMER - timer.js
 // ══════════════════════════════════════════════════════════
-import { G, getAktifData, getAtananRutinler, fbYaz, fbYazUye, emailKey, bugunStr, esc, bildirim, modalAc, modalKapat, yuklemeGoster, yuklemeGizle, msToStr, msToDkStr, hesaplaKaloriAdim, hesaplaKaloriMs, ekranGoster, acInit, sesGucluAlarm, sesAdimBitti, sesSporBitti, PARAM_LABELS, PARAM_UNITS, getGuncelKilo } from './app.js';
+import { G, getAktifData, getAtananRutinler, fbYaz, fbYazUye, emailKey, bugunStr, esc, bildirim, modalAc, modalKapat, yuklemeGoster, yuklemeGizle, msToStr, msToDkStr, hesaplaKaloriAdim, hesaplaKaloriMs, ekranGoster, acInit, sesGucluAlarm, sesAdimBitti, sesSporBitti, PARAM_LABELS, PARAM_UNITS } from './app.js';
 
 // Timer değişkenleri
 var stState = 'idle'; // idle, running, paused, overtime
@@ -46,7 +46,7 @@ export function initTimer(rutinIdx, tarih, isAtanan){
 
 function timerKiloSor(rutinIdx, tarih, devamMi, isAtanan){
     var html='<h3 style="color:var(--sport);margin-bottom:14px;">⚖️ Güncel Kilonuz</h3>';
-    html+='<div class="form-group"><input type="number" id="st-kilo-input" class="input" placeholder="Kilonuz (kg)" step="0.1" value="'+(getGuncelKilo(G.userData)||'')+'" min="30" max="300"></div>';
+    html+='<div class="form-group"><input type="number" id="st-kilo-input" class="input" placeholder="Kilonuz (kg)" step="0.1" value="'+(G.userData.profil?G.userData.profil.kilo||'':'')+'" min="30" max="300"></div>';
     html+='<button class="btn btn-sport btn-block" onclick="timerKiloSonrasi('+rutinIdx+',\''+tarih+'\','+devamMi+','+isAtanan+')">💪 Başla</button>';
     modalAc(html);
 }
@@ -57,7 +57,8 @@ function timerKiloSonrasi(rutinIdx, tarih, devamMi, isAtanan){
     if(!kilo||kilo<30){ bildirim('⚠️ Geçerli kilo girin!','uyari'); return; }
     stBaslangicKilo = kilo;
 
-    // Kilo kaydet (kilo takip için - profil.kilo başlangıç kilosu olarak korunur)
+    // Kilo kaydet
+    if(G.userData.profil) G.userData.profil.kilo = kilo;
     if(!G.userData.kiloKayitlari) G.userData.kiloKayitlari = [];
     var bugunKilo = G.userData.kiloKayitlari.find(function(k){ return k.tarih===bugunStr(); });
     if(bugunKilo) bugunKilo.kilo = kilo;
